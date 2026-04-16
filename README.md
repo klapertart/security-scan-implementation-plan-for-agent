@@ -11,7 +11,7 @@
 
 ## Prerequisites
 
-Pastikan tools berikut sudah terinstall sebelum menjalankan plan ini:
+Pastikan tools berikut denga versi minimal sudah terinstall sebelum menjalankan plan ini:
 
 - Git
 - Java 17+
@@ -29,7 +29,7 @@ Ganti semua nilai di bawah ini sesuai kebutuhan sebelum memberikan plan ini ke A
 ```
 PROJECT_DIR     = C:\path\to\your\project
 SONAR_URL       = http://localhost:9001
-SONAR_LOGIN     = your_sonarqube_token
+SONAR_TOKEN     = your_sonarqube_token
 SONAR_PROJECT_KEY  = your-project-key
 SONAR_PROJECT_NAME = Your Project Name
 REPORT_DIR      = C:\path\to\report\output
@@ -78,12 +78,6 @@ Response yang diharapkan:
 {"status":"UP"}
 ```
 
-Jika SonarQube belum berjalan, jalankan docker compose terlebih dahulu:
-
-```powershell
-cd C:\path\to\sonarqube
-docker compose up -d
-```
 
 Tunggu 60 detik lalu cek kembali status.
 
@@ -96,7 +90,7 @@ mvn clean verify sonar:sonar `
   "-Dsonar.host.url=http://localhost:9001" `
   "-Dsonar.projectKey=your-project-key" `
   "-Dsonar.projectName=Your Project Name" `
-  "-Dsonar.login=your_sonarqube_token"
+  "-Dsonar.token=your_sonarqube_token"
 ```
 
 **Kriteria lanjut ke step berikutnya:**
@@ -108,11 +102,11 @@ mvn clean verify sonar:sonar `
 
 ```powershell
 $SONAR_URL = "http://localhost:9001"
-$SONAR_LOGIN = "your_sonarqube_token"
+$SONAR_TOKEN = "your_sonarqube_token"
 $PROJECT_KEY = "your-project-key"
 
 curl -s `
-  -u "${SONAR_LOGIN}:" `
+  -u "${SONAR_TOKEN}:" `
   "${SONAR_URL}/api/issues/search?componentKeys=${PROJECT_KEY}&ps=500" `
   -o $REPORT_DIR\sonar-report.json
 
