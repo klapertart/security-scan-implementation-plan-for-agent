@@ -24,8 +24,6 @@ Pastikan tools berikut denga versi minimal sudah terinstall sebelum menjalankan 
 
 ## Variables
 
-Ganti semua nilai di bawah ini sesuai kebutuhan sebelum memberikan plan ini ke AI:
-
 ```powershell
 # Jalankan ini di terminal sebelum menjalankan step-step berikutnya
 $PROJECT_DIR     = "path project dir"
@@ -110,10 +108,10 @@ curl.exe -s `
 Write-Host "SonarQube report saved to $REPORT_DIR\sonar-report.json"
 ```
 
-**Jika ada temuan BLOCKER atau CRITICAL:**
+**Jika ada temuan (Semua Severity - Blocker hingga Low):**
 - Baca file `sonar-report.json`
 - Identifikasi isu berdasarkan severity
-- Perbaiki isu BLOCKER terlebih dahulu, lalu CRITICAL
+- Perbaiki semua isu mulai dari BLOCKER, CRITICAL, MAJOR, hingga severity MEDIUM dan LOW
 - Jalankan ulang scan untuk verifikasi
 
 ---
