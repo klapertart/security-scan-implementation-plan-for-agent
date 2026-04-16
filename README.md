@@ -26,13 +26,14 @@ Pastikan tools berikut denga versi minimal sudah terinstall sebelum menjalankan 
 
 Ganti semua nilai di bawah ini sesuai kebutuhan sebelum memberikan plan ini ke AI:
 
-```
-PROJECT_DIR     = C:\path\to\your\project
-SONAR_URL       = http://localhost:9001
-SONAR_TOKEN     = your_sonarqube_token
-SONAR_PROJECT_KEY  = your-project-key
-SONAR_PROJECT_NAME = Your Project Name
-REPORT_DIR      = C:\path\to\report\output
+```powershell
+# Jalankan ini di terminal sebelum menjalankan step-step berikutnya
+$PROJECT_DIR     = "path project dir"
+$SONAR_URL       = "http://localhost:9001"
+$SONAR_TOKEN     = "sonar-token"
+$SONAR_PROJECT_KEY  = "project-key"
+$SONAR_PROJECT_NAME = "project-name"
+$REPORT_DIR      = "path report dir"
 ```
 
 ---
@@ -44,9 +45,12 @@ REPORT_DIR      = C:\path\to\report\output
 **Jalankan perintah berikut di PowerShell dari dalam folder project:**
 
 ```powershell
+# Pastikan folder report ada
+New-Item -ItemType Directory -Force -Path $REPORT_DIR
+
 gitleaks detect --source . -v `
   --report-format json `
-  --report-path $REPORT_DIR\gitleaks-report.json
+  --report-path "$REPORT_DIR\gitleaks-report.json"
 ```
 
 **Kriteria lanjut ke step berikutnya:**
@@ -70,7 +74,7 @@ gitleaks detect --source . -v `
 ### Step 2a — Pastikan SonarQube Berjalan
 
 ```powershell
-curl http://localhost:9001/api/system/status
+curl.exe -s http://localhost:9001/api/system/status
 ```
 
 Response yang diharapkan:
@@ -78,37 +82,30 @@ Response yang diharapkan:
 {"status":"UP"}
 ```
 
-
-Tunggu 60 detik lalu cek kembali status.
+*Jika SonarQube belum UP, tunggu 60 detik lalu cek kembali status.*
 
 ### Step 2b — Jalankan Scan
 
 ```powershell
-cd $PROJECT_DIR
-
 mvn clean verify sonar:sonar `
-  "-Dsonar.host.url=http://localhost:9001" `
-  "-Dsonar.projectKey=your-project-key" `
-  "-Dsonar.projectName=Your Project Name" `
-  "-Dsonar.token=your_sonarqube_token"
+  "-Dsonar.host.url=$SONAR_URL" `
+  "-Dsonar.projectKey=$SONAR_PROJECT_KEY" `
+  "-Dsonar.projectName=$SONAR_PROJECT_NAME" `
+  "-Dsonar.token=$SONAR_TOKEN"
 ```
 
 **Kriteria lanjut ke step berikutnya:**
 - Output Maven menunjukkan `BUILD SUCCESS`
 - Output menunjukkan `ANALYSIS SUCCESSFUL`
-- Dashboard SonarQube bisa diakses di `http://localhost:9001/dashboard?id=your-project-key`
+- Dashboard SonarQube bisa diakses di `$SONAR_URL/dashboard?id=$SONAR_PROJECT_KEY`
 
 ### Step 2c — Export Hasil Scan
 
 ```powershell
-$SONAR_URL = "http://localhost:9001"
-$SONAR_TOKEN = "your_sonarqube_token"
-$PROJECT_KEY = "your-project-key"
-
-curl -s `
+curl.exe -s `
   -u "${SONAR_TOKEN}:" `
-  "${SONAR_URL}/api/issues/search?componentKeys=${PROJECT_KEY}&ps=500" `
-  -o $REPORT_DIR\sonar-report.json
+  "${SONAR_URL}/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&ps=500" `
+  -o "$REPORT_DIR\sonar-report.json"
 
 Write-Host "SonarQube report saved to $REPORT_DIR\sonar-report.json"
 ```
@@ -128,11 +125,10 @@ Write-Host "SonarQube report saved to $REPORT_DIR\sonar-report.json"
 ### Step 3a — Jalankan Scan
 
 ```powershell
-cd $PROJECT_DIR
-
+# Scan Filesystem
 trivy fs . `
   --format json `
-  --output $REPORT_DIR\trivy-report.json
+  --output "$REPORT_DIR\trivy-report.json"
 ```
 
 ### Step 3b — Tampilkan Ringkasan di Terminal
@@ -158,7 +154,7 @@ trivy fs . --severity CRITICAL,HIGH
 Setelah semua step selesai, folder `$REPORT_DIR` akan berisi:
 
 ```
-report-output/
+scan-reports/
 ├── gitleaks-report.json    ← hasil scan secret
 ├── sonar-report.json       ← hasil scan SAST
 └── trivy-report.json       ← hasil scan dependency CVE
@@ -181,6 +177,6 @@ Semua step dianggap selesai jika:
 - Jalankan setiap step secara berurutan. Jangan lanjut ke step berikutnya jika step sebelumnya gagal.
 - Jika ada perintah yang gagal, tampilkan pesan error lengkapnya dan hentikan eksekusi.
 - Semua perintah dijalankan di Windows PowerShell.
-- Variabel `$REPORT_DIR` harus sudah ada sebagai folder sebelum menjalankan perintah. Buat folder jika belum ada: `New-Item -ItemType Directory -Force -Path $REPORT_DIR`
+- Variabel `$REPORT_DIR` harus sudah ada sebagai folder sebelum menjalankan perintah.
 - Jangan modifikasi source code tanpa konfirmasi dari developer.
 - Laporkan ringkasan hasil setiap step sebelum melanjutkan ke step berikutnya.
